@@ -1,0 +1,8 @@
+import { lazy, Suspense } from 'react';
+import { Badge, Button, Icon, PageHeading } from '../components/ui';
+import { money } from '../lib';
+import type { Scenario } from '../types';
+const TimelineTree = lazy(() => import('../components/TimelineTree'));
+export default function Timelines({ scenarios, open, compare, studio }: { scenarios: Scenario[]; open: (id: string) => void; compare: () => void; studio: () => void }) {
+  return <><PageHeading eyebrow="TIMELINE EXPLORER" title="Every choice leaves a trail." description="Independent futures, connected by the moments that shaped them."><Button variant="secondary" onClick={compare}><Icon name="compare" size={17}/> Compare futures</Button></PageHeading>{scenarios.length ? <><section className="panel timeline-panel"><Suspense fallback={<div className="empty">Loading your timelines…</div>}><TimelineTree scenarios={scenarios} select={open}/></Suspense><p className="quiet-note">Select a node to enter that future. Rewind from the game to create a branch.</p></section><div className="timeline-cards">{scenarios.map(scenario => <button className="panel timeline-card" key={scenario.id} onClick={() => open(scenario.id)}><Badge muted>{scenario.campaign ? 'Campaign' : 'Projection'} · month {scenario.state.month}</Badge><h3>{scenario.name}</h3><p>{money(scenario.state.net_worth)} net worth · {scenario.state.work_hours}h working week</p><span className="text-link">Enter this timeline ↗</span></button>)}</div></> : <section className="empty panel"><Icon name="timelines" size={42}/><h2>Your first timeline starts here.</h2><p>Simulate a decision, then branch to explore another way.</p><Button onClick={studio}>Create a future</Button></section>}</>;
+}

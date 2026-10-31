@@ -1,0 +1,9 @@
+import { AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import type { State } from '../types';
+import { compactMoney, money } from '../lib';
+export default function ProjectionChart({ paths }: { paths: Record<string, State[]> }) {
+  const months = [...new Set(Object.values(paths).flatMap(path => path.map(snapshot => snapshot.month)))].sort((first, second) => first-second);
+  const values = Object.fromEntries(Object.entries(paths).map(([name,path]) => [name, new Map(path.map(snapshot => [snapshot.month, snapshot.net_worth]))]));
+  const data = months.map(month => Object.fromEntries([['month', month], ...Object.entries(values).map(([name, lookup]) => [name, lookup.get(month)])]));
+  return <div className="chart" role="img" aria-label="Net worth by simulated month for modeled trajectories"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data} margin={{ top: 12, right: 10, left: 0, bottom: 0 }}><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#b6d996" stopOpacity={.2}/><stop offset="100%" stopColor="#b6d996" stopOpacity={0}/></linearGradient></defs><CartesianGrid stroke="#ffffff0b" vertical={false}/><XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#8c9990', fontSize: 11 }} tickFormatter={value => `M${value}`}/><YAxis width={65} tickLine={false} axisLine={false} tick={{ fill: '#8c9990', fontSize: 11 }} tickFormatter={compactMoney}/><Tooltip contentStyle={{ background: '#202923', border: '1px solid #3c4b40', borderRadius: 10 }} formatter={value => money(Number(value))} labelFormatter={label => `Month ${label}`}/>{Object.keys(paths).map((name, index) => <Area key={name} type="monotone" dataKey={name} stroke={['#b6d996','#8aafc3','#d5ac79'][index % 3]} strokeWidth={2} fill={name === 'central' ? 'url(#area)' : 'transparent'} isAnimationActive={false}/>)}</AreaChart></ResponsiveContainer></div>;
+}
